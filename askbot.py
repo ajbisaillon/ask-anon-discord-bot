@@ -8,10 +8,6 @@ client = discord.Client()
 anonymous_questions_cat_name = "anonymous-questions"
 questions_channel_name = "ask"
 anon_questions_channel_name = "anon-questions"
-answers_channel_name = "qa"
-
-approve_emoji = "✅" # :white_check_mark:
-deny_emoji = "🚫"    # :no_entry_sign:
 
 channel_mention_re = r"<#(\d+)>"
 
@@ -37,14 +33,11 @@ async def on_guild_join(guild):
         bot = await guild.fetch_member(client.user.id)
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            owner: discord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, manage_messages=True),
+            owner: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True),
             bot: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_messages=True)
         }
         # create channel
         await anonymous_questions_cat.create_text_channel(anon_questions_channel_name, overwrites=overwrites)
-    if (discord.utils.get(guild.text_channels, name=answers_channel_name) == None): 
-        # create channel
-        await anonymous_questions_cat.create_text_channel(answers_channel_name)
 
 @client.event
 async def on_message(message):
@@ -72,11 +65,7 @@ async def on_message(message):
 
     if message.content.startswith("!commands"):
         await message.reply("**Usage:**\n"
-        "Use command `!move <message_id> <#channel_name>` to move the specified message to a specific channel (hold shift and hover over a message to get the id).\n"
-        "\n"
-        "*Quick move:*\n"
-        "React with ✅ to approve a question and send it to the public channel `qa`.\n"
-        "React with 🚫 to deny a question and delete it.\n")
+        "Use command `!move <message_id> <#channel_name>` to move the specified message to a specific channel (hold shift and hover over a message to get the id).\n")
 
     if message.content.startswith("!move"):
         # check if server owner
@@ -103,23 +92,6 @@ async def on_message(message):
         target_channel = discord.utils.get(message.guild.channels, id=target_channel_id)
         await target_channel.send(question.content)
         await question.delete()
-        await message.delete()
-
-@client.event
-async def on_raw_reaction_add(payload):
-    anon_questions_channel = discord.utils.get(payload.member.guild.text_channels, name=anon_questions_channel_name)
-    if (payload.channel_id != anon_questions_channel.id):
-        return
-
-    partial_message = anon_questions_channel.get_partial_message(payload.message_id)
-    message = await partial_message.fetch()
-
-    if payload.emoji.name == approve_emoji:
-        answers_channel = discord.utils.get(payload.member.guild.text_channels, name=answers_channel_name)
-        question = message.content    
-        await answers_channel.send(question)
-        await message.delete()
-    elif payload.emoji.name == deny_emoji:
         await message.delete()
 
 load_dotenv()
