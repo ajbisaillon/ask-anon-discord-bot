@@ -9,6 +9,8 @@ anonymous_questions_cat_name = "anonymous-questions"
 questions_channel_name = "ask"
 anon_questions_channel_name = "anon-questions"
 
+server_id = os.environ["server_id"]
+
 channel_mention_re = r"<#(\d+)>"
 
 @client.event 
@@ -45,6 +47,27 @@ async def on_message(message):
     if message.author.id == client.user.id:
         return
 
+    # check if the message was a DM
+    if isinstance(message.channel, discord.DMChannel):
+        await handle_DM(message)
+
+    else:
+        await handle_channel_message(message)
+
+
+async def handle_DM(message):
+    question = message.content
+    # getting the destination channel
+    server = await client.fetch_guild(server_id)
+    all_channels = await server.fetch_channels()
+    for channel in all_channels:
+        if channel.name == anon_questions_channel_name:
+            await channel.send(question)
+    # processes the commands that have been registered to the bot and other groups
+    # ***called automatically inside the on_message() event
+    # await client.process_commands(message)
+
+async def handle_channel_message(message):
     # ONLY want to delete messages sent in the "questions" text channel
     questions_channel = discord.utils.get(message.guild.text_channels, name=questions_channel_name)
     if (message.channel == questions_channel):
