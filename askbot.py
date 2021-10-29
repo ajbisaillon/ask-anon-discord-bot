@@ -64,12 +64,9 @@ async def handle_DM(message):
     for channel in all_channels:
         if channel.name == anon_questions_channel_name:
             await channel.send(question)
-    # processes the commands that have been registered to the bot and other groups
-    # ***called automatically inside the on_message() event
-    # await client.process_commands(message)
 
 async def handle_channel_message(message):
-    # ONLY want to delete messages sent in the "questions" text channel
+    # ONLY want to delete messages sent in the "ask" text channel
     questions_channel = discord.utils.get(message.guild.text_channels, name=questions_channel_name)
     if (message.channel == questions_channel):
         anon_questions_channel = discord.utils.get(message.guild.text_channels, name=anon_questions_channel_name)
@@ -83,13 +80,14 @@ async def handle_channel_message(message):
     if message.content.startswith("!summary"):
         await message.reply("**Summary:**\n"
         "On joining a server, the bot will create the `ANONYMOUS-QUESTIONS` channel category.\n"
-        "Any user can send messages in the `ask` channel.\n" 
+        "Any user can direct message the bot (preferred method) OR send messages in the `ask` channel.\n" 
         "The bot will repost the message content in the `anon-questions` channel, which is viewable only by the server owner.\n"
-        "The server owner can choose which questions are published.\n")
+        "The server owner can choose which questions are published and where using the `!move` command.\n")
 
     if message.content.startswith("!commands"):
         await message.reply("**Usage:**\n"
-        "Use command `!move <message_id> <#channel_name>` to move the specified message to a specific channel (hold shift and hover over a message to get the id).\n")
+        "Use command `!move <message_id> <#channel_name>` to have the bot repost a message in a specific channel.\n" 
+        "The message ID can be obtained by holding shift and hovering over the message.\n")
 
     if message.content.startswith("!move"):
         # check if server owner
