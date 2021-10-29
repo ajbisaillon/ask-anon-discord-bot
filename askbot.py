@@ -4,6 +4,7 @@ import re
 from dotenv import load_dotenv
 
 client = discord.Client() 
+load_dotenv()
 
 anonymous_questions_cat_name = "anonymous-questions"
 questions_channel_name = "ask"
@@ -117,5 +118,4 @@ async def handle_channel_message(message):
         await question.delete()
         await message.delete()
 
-load_dotenv()
 client.run(os.environ["token_id"])
